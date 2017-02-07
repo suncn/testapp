@@ -1,81 +1,71 @@
-import React, { Component } from 'react';
-import Immutable from 'immutable';
+import React from 'react'
+import { render } from 'react-dom'
+import { Router, browserHistory } from 'react-router'
 
+import './stubs/COURSES'
 
-
-class App extends Component {
-  
-  constructor(){
-      super();
-      this.state = {
-        list : Immutable.fromJS(this.getData())
-      };
-  }
-
-  getData(){
-      let dataArr = [];
-      for(let i = 0; i < 2000; i++){
-          let checked = Math.random() < 0.5;
-          dataArr.push({
-              name: i,
-              checked
-          });
-      }
-
-      return dataArr;
-  }
-
-  // 对数据的状态进行变更
-    toggleChecked(event){
-        let checked = event.target.checked;
-        let index = event.target.getAttribute("data-index");
-        
-        // 这里不再是直接修改对象的checked的值了，而是通过setIn，从而获得一个新的list数据
-        let list = this.state.list.setIn([index, "checked"], checked);
-
-        this.setState({list});
-    };
-
-    render(){
-        console.log("renderParent");
-        return (
-            <ul>
-                {this.state.list.map((data, index)=>{
-                    return (
-                        <ListItem data={data}
-                            index={index} key={index}
-                            toggleChecked={this.toggleChecked.bind(this)}
-                        />
-                    )
-                })}
-            </ul>
-        )
-    };
+const rootRoute = {
+  childRoutes: [ {
+    path: '/',
+    component: require('./components/App'),
+    childRoutes: [
+      require('./routes/Calendar'),
+      require('./routes/Course'),
+      require('./routes/Grades'),
+      require('./routes/Messages'),
+      require('./routes/Profile')
+    ]
+  } ]
 }
+render((
+  <Router
+    history={browserHistory}
+    routes={rootRoute}
+  />
+), document.getElementById('root'))
 
-// 代表每一个子组件
-class ListItem extends Component {
+// I've unrolled the recursive directory loop that is happening above to get a
+// better idea of just what this huge-apps Router looks like, or just look at the
+// file system :)
+//
+// import { Route } from 'react-router'
 
-    shouldComponentUpdate(nextProps){
-        // 这里直接对传入的data进行检测，因为只需要检测它们的引用是否一致即可，所以并不影响性能。
-        return this.props.data !== nextProps.data;
-    };
+// import App from './components/App'
+// import Course from './routes/Course/components/Course'
+// import AnnouncementsSidebar from './routes/Course/routes/Announcements/components/Sidebar'
+// import Announcements from './routes/Course/routes/Announcements/components/Announcements'
+// import Announcement from './routes/Course/routes/Announcements/routes/Announcement/components/Announcement'
+// import AssignmentsSidebar from './routes/Course/routes/Assignments/components/Sidebar'
+// import Assignments from './routes/Course/routes/Assignments/components/Assignments'
+// import Assignment from './routes/Course/routes/Assignments/routes/Assignment/components/Assignment'
+// import CourseGrades from './routes/Course/routes/Grades/components/Grades'
+// import Calendar from './routes/Calendar/components/Calendar'
+// import Grades from './routes/Grades/components/Grades'
+// import Messages from './routes/Messages/components/Messages'
 
-    render(){
-        let data = this.props.data;
-        let index = this.props.index;
-
-        console.log("renderChild");
-
-        // 取值也不再是直接.出来，而是通过get或者getIn
-        return (
-            <li>
-                <input type="checkbox" data-index={index} key = {index} checked={data.get("checked")} onChange={this.props.toggleChecked}/>
-                <span>{data.get("name")}</span>
-            </li>
-        )
-    }
-}
-
-
-export default App;
+// render(
+//   <Router>
+//     <Route path="/" component={App}>
+//       <Route path="calendar" component={Calendar} />
+//       <Route path="course/:courseId" component={Course}>
+//         <Route path="announcements" components={{
+//           sidebar: AnnouncementsSidebar,
+//           main: Announcements
+//         }}>
+//           <Route path=":announcementId" component={Announcement} />
+//         </Route>
+//         <Route path="assignments" components={{
+//           sidebar: AssignmentsSidebar,
+//           main: Assignments
+//         }}>
+//           <Route path=":assignmentId" component={Assignment} />
+//         </Route>
+//         <Route path="grades" component={CourseGrades} />
+//       </Route>
+//       <Route path="grades" component={Grades} />
+//       <Route path="messages" component={Messages} />
+//       <Route path="profile" component={Calendar} />
+//     </Route>
+//   </Router>,
+//   document.getElementById('example')
+// )
